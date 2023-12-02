@@ -1,4 +1,4 @@
-version: '3.9'
+version: "3.9"
 
 services:
   app:
@@ -6,28 +6,39 @@ services:
       context: .
       args:
         - DEV=true
-    ports: 
+    ports:
       - "8000:8000"
     volumes:
       - ./app:/app
     command: >
-     sh -c "python manage.py runserver 0.0.0.0:8000"
+      sh -c "python manage.py wait_for_db &&
+             python manage.py migrate &&
+             python manage.py runserver 0.0.0.0:8000"
     environment:
       - DB_HOST=db
-      - DB_NAME=dev_db
-      - DB_USER=dev_user
-      - DB_PASSWORD=changeme
+      - DB_NAME=devdb
+      - DB_USER=devuser
+      - DB_PASS=changeme
+      - DEBUG=1
     depends_on:
-      - db
-  
+      db:
+        #CHANGE 2: it prevents issuing a request while the server is starting to depend on the healthy status of postgres-db
+        condition: service_healthy
+
   db:
-    image: postgres:14.10-alpine3.18
+    image: postgres:13-alpine
     volumes:
-      - dev-db-data:/var/lib/postgresqldata
+      - dev-db-data:/var/lib/postgresql/data
     environment:
-      - POSTGRES_DB=dev_db
-      - POSTGRES_USER=dev_user
-      - POSTGRES_PASSWORD=changeme
+      - POSTGRES_DB=devdb
+      - POSTGRES_USER=devuser
+      - POSTGRES_PASSWORD=change
+    healthcheck:
+      #CHANGE 1: this command checks if the database is ready, right on the source db server
+      test: [ "CMD-SHELL", "pg_isready -d devdb -U devuser" ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
 volumes:
   dev-db-data:
