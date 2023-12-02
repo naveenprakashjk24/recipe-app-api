@@ -19,7 +19,6 @@ services:
       - DB_NAME=devdb
       - DB_USER=devuser
       - DB_PASS=changeme
-      - DEBUG=1
     depends_on:
       db:
         #CHANGE 2: it prevents issuing a request while the server is starting to depend on the healthy status of postgres-db
@@ -32,7 +31,7 @@ services:
     environment:
       - POSTGRES_DB=devdb
       - POSTGRES_USER=devuser
-      - POSTGRES_PASSWORD=change
+      - POSTGRES_PASSWORD=changeme
     healthcheck:
       #CHANGE 1: this command checks if the database is ready, right on the source db server
       test: [ "CMD-SHELL", "pg_isready -d devdb -U devuser" ]
