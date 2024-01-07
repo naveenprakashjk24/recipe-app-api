@@ -26,7 +26,7 @@ class PublicUserApiTest(TestCase):
         payload = {
             'email':'test123@gmail.com',
             'password':'testpass123',
-            'name' : 'test name',
+            'name' : 'test name'
         }
         res = self.client.post(CREATE_USER_URL, payload)
         self.assertEqual(res.status_code, status.HTTP_201_CREATED)
@@ -39,7 +39,7 @@ class PublicUserApiTest(TestCase):
         payload = {
             'email':'test123@gmail.com',
             'password':'testpass123',
-            'name' : 'test name',
+            'name' : 'test name'
         }
 
         create_user(**payload)
@@ -52,7 +52,7 @@ class PublicUserApiTest(TestCase):
         payload = {
             'email':'test123@gmail.com',
             'password':'testpass123',
-            'name' : 'test name',
+            'name' : 'test name'
         }
         res = self.client.post(CREATE_USER_URL, payload)
 

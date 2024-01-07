@@ -10,7 +10,6 @@ class UserSerializer(serializers.ModelSerializer):
     """ Serializer for user API"""
     class Meta:
         model = get_user_model()
-        # fiels = ['email', 'password', 'name']
         fields = '__all__'
         extra_kwargs = {
             'password':{'write_only':True, 'min_length':5}
