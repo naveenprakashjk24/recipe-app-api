@@ -12,9 +12,11 @@ from rest_framework import status
 CREATE_USER_URL = reverse('user:create')
 TOKEN_URL = reverse('user:token')
 
+
 def create_user(**params):
     """ Create and return new user"""
     return get_user_model().objects.create_user(**params)
+
 
 class PublicUserApiTest(TestCase):
     """ Test the public feature of the user API"""
@@ -73,8 +75,8 @@ class PublicUserApiTest(TestCase):
         create_user(**user_details)
 
         payload = {
-            'email':user_details['name'],
-            'password':user_details['password']
+            'email': user_details['email'],
+            'password': user_details['password']
         }
 
         res = self.client.post(TOKEN_URL, payload)
@@ -85,7 +87,8 @@ class PublicUserApiTest(TestCase):
     def test_create_token_bad_credential(self):
         """ Test return error if credentials invalid"""
 
-        create_user(name= 'Test User',email= 'testuser123@gmail.com',password= 'test123')
+        create_user(name='Test User', email='testuser123@gmail.com',
+                    password='test123')
 
         payload = {
             'name': 'testuser123@gmail.com',
