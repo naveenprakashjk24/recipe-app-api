@@ -1,6 +1,6 @@
-'''
+"""
 Test for User api.
-'''
+"""
 
 from django.test import TestCase
 from django.contrib.auth import get_user_model
@@ -9,18 +9,18 @@ from django.urls import reverse
 from rest_framework.test import APIClient
 from rest_framework import status
 
-CREATE_USER_URL = reverse('user:create')
-TOKEN_URL = reverse('user:token')
-ME_URL = reverse('user:me')
+CREATE_USER_URL = reverse("user:create")
+TOKEN_URL = reverse("user:token")
+ME_URL = reverse("user:me")
 
 
 def create_user(**params):
-    """ Create and return new user"""
+    """Create and return new user"""
     return get_user_model().objects.create_user(**params)
 
 
 class PublicUserApiTest(TestCase):
-    """ Test the public feature of the user API"""
+    """Test the public feature of the user API"""
 
     def setup(self):
         self.client = APIClient()
@@ -65,57 +65,47 @@ class PublicUserApiTest(TestCase):
     #     self.assertFalse(user_exists)
 
     def test_create_toker_for_user(self):
-        """ Test generate token for valid user"""
+        """Test generate token for valid user"""
 
         user_details = {
-            'name': 'Test User',
-            'email': 'testuser123@gmail.com',
-            'password': 'test123'
+            "name": "Test User",
+            "email": "testuser123@gmail.com",
+            "password": "test123",
         }
 
         create_user(**user_details)
 
-        payload = {
-            'email': user_details['email'],
-            'password': user_details['password']
-        }
+        payload = {"email": user_details["email"], "password": user_details["password"]}
 
         res = self.client.post(TOKEN_URL, payload)
 
-        self.assertIn('token', res.data)
+        self.assertIn("token", res.data)
         self.assertEqual(res.status_code, status.HTTP_200_OK)
 
     def test_create_token_bad_credential(self):
-        """ Test return error if credentials invalid"""
+        """Test return error if credentials invalid"""
 
-        create_user(name='Test User', email='testuser123@gmail.com',
-                    password='test123')
+        create_user(name="Test User", email="testuser123@gmail.com", password="test123")
 
-        payload = {
-            'name': 'testuser123@gmail.com',
-            'password': 'test'
-        }
+        payload = {"name": "testuser123@gmail.com", "password": "test"}
 
         res = self.client.post(TOKEN_URL, payload)
 
-        self.assertNotIn('token', res.data)
+        self.assertNotIn("token", res.data)
         self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_create_token_blank_password(self):
-        """ Test return error if credentials invalid"""
+        """Test return error if credentials invalid"""
 
-        payload = {
-            'name': '',
-            'password': 'test123'
-        }
+        payload = {"name": "", "password": "test123"}
 
         res = self.client.post(TOKEN_URL, payload)
 
-        self.assertNotIn('token', res.data)
+        self.assertNotIn("token", res.data)
         self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_retrieve_user_unauthorized(self):
-        '''Test authendications is required for user'''
+        """Test authendications is required for user"""
 
         res = self.client.get(ME_URL)
         self.assertEqual(res.status_code, status.HTTP_401_UNAUTHORIZED)
@@ -125,28 +115,29 @@ class PrivateUserTestcases(TestCase):
 
     def setup(self):
         self.user = create_user(
-            email = 'test@example.com',
-            password = 'test123',
-            name = 'Test Name'
+            email="test@example.com", password="test123", name="Test Name"
         )
 
         self.client = APIClient()
         self.client.force_authenticate(user=self.user)
 
     def test_retrieve_profile_success(self):
-        '''Test retrieving the profile for logged in user'''
+        """Test retrieving the profile for logged in user"""
 
         res = self.client.get(ME_URL)
 
         self.assertEqual(res.status_code, status.HTTP_200_OK)
-        self.assertEqual(res.data, {
-            'email': self.user.email,
-            'name':self.user.name,
-        })
+        self.assertEqual(
+            res.data,
+            {
+                "email": self.user.email,
+                "name": self.user.name,
+            },
+        )
 
     def test_post_me_not_allowed(self):
         """Test POST is not allowed for the me url"""
 
-        res = self.client.post(ME_URL,{})
+        res = self.client.post(ME_URL, {})
 
         self.assertEqual(res.status_code, status.HTTP_405_METHOD_NOT_ALLOWED)
