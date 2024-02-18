@@ -122,4 +122,31 @@ class PublicUserApiTest(TestCase):
 
 
 class PrivateUserTestcases(TestCase):
-    pass
+
+    def setup(self):
+        self.user = create_user(
+            email = 'test@example.com',
+            password = 'test123',
+            name = 'Test Name'
+        )
+
+        self.client = APIClient()
+        self.client.force_authenticate(user=self.user)
+
+    def test_retrieve_profile_success(self):
+        '''Test retrieving the profile for logged in user'''
+
+        res = self.client.get(ME_URL)
+
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        self.assertEqual(res.data, {
+            'email': self.user.email,
+            'name':self.user.name,
+        })
+
+    def test_post_me_not_allowed(self):
+        """Test POST is not allowed for the me url"""
+
+        res = self.client.post(ME_URL,{})
+
+        self.assertEqual(res.status_code, status.HTTP_405_METHOD_NOT_ALLOWED)
