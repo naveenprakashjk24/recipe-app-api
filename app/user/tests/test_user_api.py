@@ -140,3 +140,13 @@ class PrivateUserTestcases(TestCase):
         res = self.client.post(ME_URL, {})
 
         self.assertEqual(res.status_code, status.HTTP_405_METHOD_NOT_ALLOWED)
+
+    def test_updating_the_user_profile(self):
+        '''Test updating the user profile'''
+        payload = {'name':'new name', 'password':'newpassword123'}
+
+        self.client.patch(ME_URL, payload)
+
+        self.user.refresh_from_db()
+        self.assertEqual(self.user.name, payload['name'])
+        self.assertTrue(self.user.check_password(payload['password']))
