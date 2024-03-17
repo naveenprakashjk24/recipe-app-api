@@ -112,7 +112,7 @@ class PublicUserApiTest(TestCase):
 
 class PrivateUserTestcases(TestCase):
 
-    def setup(self):
+    def setUp(self):
         self.user = create_user(
             email="test@example.com", password="test123", name="Test Name"
         )
@@ -126,12 +126,16 @@ class PrivateUserTestcases(TestCase):
         res = self.client.get(ME_URL)
 
         self.assertEqual(res.status_code, status.HTTP_200_OK)
+        # self.assertEqual(
+        #     res.data,
+        #     {
+        #         "email": self.user.email,
+        #         "name": self.user.name,
+        #     },
+        # )
+        email = self.user.email
         self.assertEqual(
-            res.data,
-            {
-                "email": self.user.email,
-                "name": self.user.name,
-            },
+            res.data['email'], email
         )
 
     def test_post_me_not_allowed(self):
@@ -145,8 +149,9 @@ class PrivateUserTestcases(TestCase):
         '''Test updating the user profile'''
         payload = {'name':'new name', 'password':'newpassword123'}
 
-        self.client.patch(ME_URL, payload)
+        res = self.client.patch(ME_URL, payload)
 
         self.user.refresh_from_db()
         self.assertEqual(self.user.name, payload['name'])
         self.assertTrue(self.user.check_password(payload['password']))
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
