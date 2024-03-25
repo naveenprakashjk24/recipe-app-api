@@ -8,11 +8,16 @@ from core.models import Recipe
 from django.contrib.auth import get_user_model
 from django.test import TestCase
 from django.urls import reverse
-from recipe.serializers import RecipeSerializer
+from recipe.serializers import RecipeDetailSerializer, RecipeSerializer
 from rest_framework import status
 from rest_framework.test import APIClient
+from yaml import serialize
 
 RECIPE_URL = reverse('recipe:recipe-list')
+
+def details_url(recipe_id):
+    '''Create and return the recipe details URL'''
+    return reverse('recipe:recipe-detail', args=[recipe_id])
 
 def create_recipe(user, **params):
     '''Create and return the recipes'''
@@ -78,3 +83,13 @@ class PrivateRecipeAPITest(TestCase):
         serialize = RecipeSerializer(recipes, many=True)
         self.assertEqual(res.status_code, status.HTTP_200_OK)
         self.assertEqual(res.data, serialize.data)
+
+    def test_get_recipe_details(self):
+        '''Test get recipe details'''
+
+        recipe = create_recipe(user=self.user)
+        url = details_url(recipe.id)
+        res = self.client.get(url)
+
+        serializer = RecipeDetailSerializer(recipe)
+        self.assertEqual(res.data, serializer.data)

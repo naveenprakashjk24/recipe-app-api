@@ -2,7 +2,6 @@
 Database model for the project
 """
 
-from unittest.util import _MAX_LENGTH
 
 from django.conf import settings
 from django.contrib.auth.models import (AbstractBaseUser, BaseUserManager,
