@@ -8,9 +8,13 @@ from django.test import TestCase
 from django.urls import reverse
 from recipe.serializers import TagSerializer
 from rest_framework import status
-from rest_framework.test import APIClient
+from rest_framework.test import APIClient # type: ignore
 
 TAG_URL = reverse('recipe:tag-list')
+
+def detail_tag(tag_id):
+    """create and return a tag details url."""
+    return reverse('recipe:tag-detail', args=[tag_id])
 
 def create_user(email='test@email.com', password='test123'):
     '''Create and return the user'''
@@ -56,3 +60,15 @@ class PrivateTagsApiTest(TestCase):
         self.assertEqual(len(res.data),1)
         self.assertEqual(res.data[0]['name'], tag.name)
         self.assertEqual(res.data[0]['id'], tag.id)
+        
+    def test_update_tag(self):
+        """Test updating a tag."""
+        tag = Tag.objects.create(user=self.user, name='After Dinner')
+        
+        payload = {'name': 'Dessert'}
+        url = detail_tag(tag.id)
+        res = self.client.patch(url, payload)
+        
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        tag.refresh_from_db()
+        self.assertEqual(tag.name, payload['name'])
